@@ -1,10 +1,12 @@
 package com.bext.spring.controller;
 
+import java.net.URI;
 import java.time.Instant;
 import java.util.Collections;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,13 +14,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.bext.spring.user.domain.User;
 
-import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -53,12 +53,23 @@ public class UserRestController {
 		return monoUser.map( ResponseEntity::ok)
 				.switchIfEmpty( Mono.error(( new ResponseStatusException(HttpStatus.NOT_FOUND) )));
 	}
-	
+/*	
 	@PostMapping
 	public Mono<User> newUser(@RequestBody User user){
 		Mono<User> monoUser = Mono.just(user);
 		users = users.mergeWith(monoUser);
 		return monoUser;
+	}
+*/	
+	@PostMapping     //For Test
+	public Mono<ResponseEntity<Object>> newUser(@RequestBody Mono<User> userMono, ServerHttpRequest req){
+		userMono = userMono.map( user -> {
+			user.setId(6);
+			return user;
+		});
+		users = users.mergeWith(userMono);
+		return userMono.map( u -> 
+			ResponseEntity.created(URI.create(req.getPath() + "/" + u.getId())).build());
 	}
 	
 	@DeleteMapping("/{id}")
