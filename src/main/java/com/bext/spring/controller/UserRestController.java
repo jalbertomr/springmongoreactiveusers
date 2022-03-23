@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.Collections;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,9 +14,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.bext.spring.user.domain.User;
 
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -45,8 +48,10 @@ public class UserRestController {
 	}
 	
 	@GetMapping("/{id}")
-	public Mono<User> getUserById(@PathVariable("id") long id){
-		return Mono.from(users.filter( user -> id == user.getId()));
+	public Mono<ResponseEntity<User>> getUserById(@PathVariable("id") long id){
+		Mono<User> monoUser = Mono.from(users.filter( user -> id == user.getId()));
+		return monoUser.map( ResponseEntity::ok)
+				.switchIfEmpty( Mono.error(( new ResponseStatusException(HttpStatus.NOT_FOUND) )));
 	}
 	
 	@PostMapping
@@ -61,4 +66,5 @@ public class UserRestController {
 		users = users.filter(user -> user.getId() != id);
 		return users.then();
 	}
+	
 }
