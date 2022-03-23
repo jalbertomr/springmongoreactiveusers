@@ -3,10 +3,15 @@ package com.bext.spring.controller;
 import java.time.Instant;
 import java.util.Collections;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bext.spring.user.domain.User;
@@ -42,5 +47,18 @@ public class UserRestController {
 	@GetMapping("/{id}")
 	public Mono<User> getUserById(@PathVariable("id") long id){
 		return Mono.from(users.filter( user -> id == user.getId()));
+	}
+	
+	@PostMapping
+	public Mono<User> newUser(@RequestBody User user){
+		Mono<User> monoUser = Mono.just(user);
+		users = users.mergeWith(monoUser);
+		return monoUser;
+	}
+	
+	@DeleteMapping("/{id}")
+	public Mono<Void> deleteUser(@PathVariable("id") long id){
+		users = users.filter(user -> user.getId() != id);
+		return users.then();
 	}
 }
