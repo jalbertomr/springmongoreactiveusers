@@ -3,6 +3,8 @@ package com.bext.spring.controller;
 import java.net.URI;
 import java.time.Instant;
 import java.util.Collections;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,7 +37,7 @@ public class UserRestController {
 	private Flux<User> createUsersModel() {
 		User user = new User(1, "Daisy Ridley", "daisy.ridley@email.com", "daisypassword", Collections.singletonList("ADMIN"), Instant.now(), true);
 		User user2= new User(2,"Tom Raider","tom.raider@email.com","tompassword", Collections.singletonList("ADMIN"), Instant.now(), false);
-		User user3= new User(3,"Peter Parker","peter.parker@email.com", "peterpassword", Collections.singletonList("USER"), Instant.now(), true);
+		User user3= new User(3,"Peter Parker","peter.parker@email.com", "peterpassword", Stream.of("USER","ADMIN").collect(Collectors.toList()), Instant.now(), true);
 		return Flux.just( user, user2, user3);
 	}
 	
@@ -53,24 +55,29 @@ public class UserRestController {
 		return monoUser.map( ResponseEntity::ok)
 				.switchIfEmpty( Mono.error(( new ResponseStatusException(HttpStatus.NOT_FOUND) )));
 	}
-/*	
+
 	@PostMapping
-	public Mono<User> newUser(@RequestBody User user){
+	public Mono<ResponseEntity<User>> newUser(@RequestBody User user, ServerHttpRequest req){
 		Mono<User> monoUser = Mono.just(user);
 		users = users.mergeWith(monoUser);
-		return monoUser;
+		//return monoUser.map( u -> ResponseEntity.created(URI.create(req.getPath() + "/" + u.getId())).build());
+		//return monoUser.map( u -> new ResponseEntity<User>(u, new HttpHeaders(),HttpStatus.OK));
+		return monoUser.map( u -> ResponseEntity.created( URI.create(req.getPath() + "/" + u.getId()) ).body(u)
+				           );
 	}
-*/	
-	@PostMapping     //For Test
-	public Mono<ResponseEntity<Object>> newUser(@RequestBody Mono<User> userMono, ServerHttpRequest req){
+	
+/*	
+	@PostMapping     //Assign an fixed Id to test
+	public Mono<ResponseEntity<Object>> newUserFixId(@RequestBody Mono<User> userMono, ServerHttpRequest req){
 		userMono = userMono.map( user -> {
 			user.setId(6);
 			return user;
 		});
 		users = users.mergeWith(userMono);
 		return userMono.map( u -> 
-			ResponseEntity.created(URI.create(req.getPath() + "/" + u.getId())).build());
+			ResponseEntity.created(URI.create(req.getPath() + "/" + u.getId()) ).body(u));
 	}
+*/
 	
 	@DeleteMapping("/{id}")
 	public Mono<Void> deleteUser(@PathVariable("id") long id){
