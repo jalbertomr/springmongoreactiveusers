@@ -1,4 +1,4 @@
-package com.bext.spring.service;
+package com.bext.spring.service.impl;
 
 import java.time.Instant;
 import java.util.Collections;
@@ -8,20 +8,21 @@ import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.bext.spring.service.IUserService;
 import com.bext.spring.user.domain.User;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
-public class UserServiceImpl {
+public class UserServiceImpl implements IUserService {
 
 	private Flux<User> users;
-		
+
 	public UserServiceImpl() {
 		users = createUserModel();
 	}
-	
+
 	private Flux<User> createUserModel() {
 		User user = new User(1, "Daisy Ridley", "daisy.ridley@email.com", "daisypassword", Collections.singletonList("ADMIN"), Instant.now(), true);
 		User user2= new User(2,"Tom Raider","tom.raider@email.com","tompassword", Collections.singletonList("ADMIN"), Instant.now(), false);
@@ -50,6 +51,6 @@ public class UserServiceImpl {
 	
 	public void	deleteById(Long Id) {
 	   users = users.filter(user -> user.getId() != Id);
-	};
-		
+	}
+
 }

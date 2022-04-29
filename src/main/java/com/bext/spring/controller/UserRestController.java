@@ -20,7 +20,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.bext.spring.service.UserServiceImpl;
+import com.bext.spring.service.IUserService;
+import com.bext.spring.service.impl.UserServiceImpl;
 import com.bext.spring.user.domain.User;
 
 import reactor.core.publisher.Flux;
@@ -31,7 +32,7 @@ import reactor.core.publisher.Mono;
 public class UserRestController {
  
 	@Autowired
-	private UserServiceImpl userService;
+	private IUserService userService;
 	
 	@GetMapping
 	public Flux<User> getUsers(@RequestParam(name = "limit", required = false, defaultValue = "-1") long limit){

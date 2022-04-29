@@ -11,23 +11,15 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.web.reactive.server.WebTestClient.BodySpec;
 import org.springframework.test.web.reactive.server.WebTestClient.ResponseSpec;
 import org.springframework.web.reactive.function.BodyInserters;
 
-import com.bext.spring.service.UserServiceImpl;
+import com.bext.spring.service.IUserService;
 import com.bext.spring.user.domain.User;
 
-import reactor.core.publisher.Flux;
-
-import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
-
-@WebFluxTest({UserRestController.class, UserServiceImpl.class})
+@WebFluxTest({UserRestController.class, IUserService.class})
 public class UserRestControllerTest {
 
 	@Autowired
