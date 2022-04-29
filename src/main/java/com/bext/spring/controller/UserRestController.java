@@ -58,6 +58,7 @@ public class UserRestController {
 
 	@PostMapping
 	public Mono<ResponseEntity<User>> newUser(@RequestBody User user, ServerHttpRequest req){
+		user.setLastLogin(Instant.now());
 		Mono<User> monoUser = Mono.just(user);
 		users = users.mergeWith(monoUser);
 		//return monoUser.map( u -> ResponseEntity.created(URI.create(req.getPath() + "/" + u.getId())).build());
@@ -80,9 +81,12 @@ public class UserRestController {
 */
 	
 	@DeleteMapping("/{id}")
-	public Mono<Void> deleteUser(@PathVariable("id") long id){
+	public Mono<ResponseEntity<User>> deleteUser(@PathVariable("id") long id){
+		Mono<User> userfound = Mono.from(users.filter( user -> user.getId() == id));
 		users = users.filter(user -> user.getId() != id);
-		return users.then();
+		return userfound.map(ResponseEntity::ok)
+				.switchIfEmpty( Mono.error((new ResponseStatusException(HttpStatus.NOT_FOUND))));
+		
 	}
 	
 }

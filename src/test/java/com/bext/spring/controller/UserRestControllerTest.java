@@ -1,6 +1,8 @@
 package com.bext.spring.controller;
 
 
+import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -101,7 +103,8 @@ public class UserRestControllerTest {
 		.jsonPath("$.id").isEqualTo(6)
 		.jsonPath("$.name").isEqualTo("Beto")
 		.jsonPath("$.email").isEqualTo("beto@test.com")
-		.jsonPath("$.roles[0]").isEqualTo("ADMIN");
+		.jsonPath("$.roles[0]").isEqualTo("ADMIN")
+		.jsonPath("$.lastLogin").exists();
 		//.expectBody()
 		//.jsonPath("$", isSize(1));
 	}
@@ -111,6 +114,32 @@ public class UserRestControllerTest {
 		var user = new User(6,"Beto","beto@test.com","secret", List.of("USER"), null, true);
 		webTestClient.post().uri("/user/search")
 		.body(BodyInserters.fromValue(user))
+		.exchange()
+		.expectStatus().is4xxClientError();
+	}
+	
+	@Test
+	void deleteUserSuccess() {
+		var user = new User(1, "Daisy Ridley", "daisy.ridley@email.com", "daisypassword", Collections.singletonList("ADMIN"), Instant.now(), true);
+		webTestClient.delete().uri("/user/1").exchange()
+		.expectStatus().isOk()
+		.expectBody()
+		.jsonPath("$.id").isEqualTo(1)
+		.jsonPath("$.name").isEqualTo(user.getName())
+		.jsonPath("$.email").isEqualTo(user.getEmail())
+		.jsonPath("$.password").isEqualTo(user.getPassword())
+		.jsonPath("$.roles[0]").isEqualTo("ADMIN");
+	}
+	
+	@Test
+	void deleteUserNotFound() {
+		webTestClient.delete().uri("/user/10").exchange()
+		.expectStatus().isNotFound();
+	}
+	
+	@Test
+	void deleteUserMethodNotAllowed() {
+		webTestClient.delete().uri("/user")
 		.exchange()
 		.expectStatus().is4xxClientError();
 	}
