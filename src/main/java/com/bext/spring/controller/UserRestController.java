@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.bext.spring.service.UserServiceImpl;
 import com.bext.spring.user.domain.User;
 
 import reactor.core.publisher.Flux;
@@ -28,30 +30,17 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/user")
 public class UserRestController {
  
-	private Flux<User> users;
-	
-	public UserRestController() {
-		users = createUsersModel();
-	}
-
-	private Flux<User> createUsersModel() {
-		User user = new User(1, "Daisy Ridley", "daisy.ridley@email.com", "daisypassword", Collections.singletonList("ADMIN"), Instant.now(), true);
-		User user2= new User(2,"Tom Raider","tom.raider@email.com","tompassword", Collections.singletonList("ADMIN"), Instant.now(), false);
-		User user3= new User(3,"Peter Parker","peter.parker@email.com", "peterpassword", Stream.of("USER","ADMIN").collect(Collectors.toList()), Instant.now(), true);
-		return Flux.just( user, user2, user3);
-	}
+	@Autowired
+	private UserServiceImpl userService;
 	
 	@GetMapping
 	public Flux<User> getUsers(@RequestParam(name = "limit", required = false, defaultValue = "-1") long limit){
-		if (limit == -1) {
-			return users;
-		}
-		return users.take(limit);
+		return userService.findAllLimit(limit);
 	}
 	
 	@GetMapping("/{id}")
-	public Mono<ResponseEntity<User>> getUserById(@PathVariable("id") long id){
-		Mono<User> monoUser = Mono.from(users.filter( user -> id == user.getId()));
+	public Mono<ResponseEntity<User>> getUserById(@PathVariable("id") long Id){
+		Mono<User> monoUser = userService.findById(Id);
 		return monoUser.map( ResponseEntity::ok)
 				.switchIfEmpty( Mono.error(( new ResponseStatusException(HttpStatus.NOT_FOUND) )));
 	}
@@ -60,7 +49,7 @@ public class UserRestController {
 	public Mono<ResponseEntity<User>> newUser(@RequestBody User user, ServerHttpRequest req){
 		user.setLastLogin(Instant.now());
 		Mono<User> monoUser = Mono.just(user);
-		users = users.mergeWith(monoUser);
+		userService.save(monoUser);
 		//return monoUser.map( u -> ResponseEntity.created(URI.create(req.getPath() + "/" + u.getId())).build());
 		//return monoUser.map( u -> new ResponseEntity<User>(u, new HttpHeaders(),HttpStatus.OK));
 		return monoUser.map( u -> ResponseEntity.created( URI.create(req.getPath() + "/" + u.getId()) ).body(u)
@@ -82,8 +71,8 @@ public class UserRestController {
 	
 	@DeleteMapping("/{id}")
 	public Mono<ResponseEntity<User>> deleteUser(@PathVariable("id") long id){
-		Mono<User> userfound = Mono.from(users.filter( user -> user.getId() == id));
-		users = users.filter(user -> user.getId() != id);
+		Mono<User> userfound = userService.findById(id);
+		userService.deleteById(id);
 		return userfound.map(ResponseEntity::ok)
 				.switchIfEmpty( Mono.error((new ResponseStatusException(HttpStatus.NOT_FOUND))));
 		

@@ -7,6 +7,7 @@ import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
@@ -18,6 +19,7 @@ import org.springframework.test.web.reactive.server.WebTestClient.BodySpec;
 import org.springframework.test.web.reactive.server.WebTestClient.ResponseSpec;
 import org.springframework.web.reactive.function.BodyInserters;
 
+import com.bext.spring.service.UserServiceImpl;
 import com.bext.spring.user.domain.User;
 
 import reactor.core.publisher.Flux;
@@ -25,7 +27,7 @@ import reactor.core.publisher.Flux;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
 
-@WebFluxTest(UserRestController.class)
+@WebFluxTest({UserRestController.class, UserServiceImpl.class})
 public class UserRestControllerTest {
 
 	@Autowired
@@ -33,11 +35,12 @@ public class UserRestControllerTest {
 	private WebTestClient webTestClient;
 	
 	@BeforeEach
-	public void setup() {
+	public void setup() throws InterruptedException {
 		webTestClient = WebTestClient.bindToApplicationContext(context).configureClient().baseUrl("/").build();
 	}
 	
 	@Test
+	@Order(1)
 	public void getUserByIdFromInitialDataModel_ReturnsUser() throws Exception {
 		ResponseSpec responseSpec = webTestClient.get().uri("/user/1").exchange();
      	responseSpec.expectStatus().isOk()
@@ -50,6 +53,7 @@ public class UserRestControllerTest {
 	}
 	
 	@Test
+	@Order(2)
 	public void getUserByIdFromInitialDataModel_ReturnsUser3() throws Exception {
 		ResponseSpec responseSpec = webTestClient.get().uri("/user/3").exchange();
      	responseSpec.expectStatus().isOk()
@@ -77,6 +81,7 @@ public class UserRestControllerTest {
 	
 	
 	@Test
+	@Order(3)
 	public void getUserByIdFromInitialDataModel_NotFound() throws Exception {
 		ResponseSpec responseSpec = webTestClient.get().uri("/user/-1").exchange();
 		responseSpec.expectStatus().isNotFound();
@@ -84,12 +89,14 @@ public class UserRestControllerTest {
 	
 	
 	@Test
+	@Order(4)
 	public void getUserById_invalid_error() throws Exception {
 	  ResponseSpec responseSpec = webTestClient.get().uri("/user/-1").exchange();
 	  responseSpec.expectStatus().isNotFound();
 	}
 	
 	@Test
+	@Order(5)
 	public void createUserWithValidUserInputTest() {
 		var user = new User(6, "Beto", "beto@test.com","secret", List.of("ADMIN","USER"), null, true );
 		ResponseSpec responseSpec = webTestClient.post().uri("/user")
@@ -110,6 +117,7 @@ public class UserRestControllerTest {
 	}
 	
 	@Test
+	@Order(6)
 	public void createUserMethodNotAllowed() {
 		var user = new User(6,"Beto","beto@test.com","secret", List.of("USER"), null, true);
 		webTestClient.post().uri("/user/search")
@@ -119,6 +127,7 @@ public class UserRestControllerTest {
 	}
 	
 	@Test
+	@Order(7)
 	void deleteUserSuccess() {
 		var user = new User(1, "Daisy Ridley", "daisy.ridley@email.com", "daisypassword", Collections.singletonList("ADMIN"), Instant.now(), true);
 		webTestClient.delete().uri("/user/1").exchange()
@@ -132,12 +141,14 @@ public class UserRestControllerTest {
 	}
 	
 	@Test
+	@Order(8)
 	void deleteUserNotFound() {
 		webTestClient.delete().uri("/user/10").exchange()
 		.expectStatus().isNotFound();
 	}
 	
 	@Test
+	@Order(9)
 	void deleteUserMethodNotAllowed() {
 		webTestClient.delete().uri("/user")
 		.exchange()
