@@ -72,11 +72,9 @@ public class UserRestController {
 	
 	@DeleteMapping("/{id}")
 	public Mono<ResponseEntity<User>> deleteUser(@PathVariable("id") long id){
-		Mono<User> userfound = userService.findById(id);
-		userService.deleteById(id);
+		Mono<User> userfound = userService.deleteById(id);
 		return userfound.map(ResponseEntity::ok)
 				.switchIfEmpty( Mono.error((new ResponseStatusException(HttpStatus.NOT_FOUND))));
-		
 	}
 	
 }

@@ -45,12 +45,15 @@ public class UserServiceImpl implements IUserService {
 		return users.filter(user -> user.getId() == Id).count().block() > 0;
 	};
 	
-	public void	save(Mono<User> user) {
-	   users = users.mergeWith(user);	
+	public Mono<User> save(Mono<User> user) {
+	   users = users.mergeWith(user);
+	   return user;
 	};
 	
-	public void	deleteById(Long Id) {
+	public Mono<User> deleteById(Long Id) {
+	   Mono<User> userFound = Mono.from(users.filter( user -> user.getId() == Id));	
 	   users = users.filter(user -> user.getId() != Id);
+	   return userFound;
 	}
 
 }
