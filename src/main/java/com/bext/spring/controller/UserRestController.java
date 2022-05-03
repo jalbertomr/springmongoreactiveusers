@@ -46,14 +46,18 @@ public class UserRestController {
 				.switchIfEmpty( Mono.error(( new ResponseStatusException(HttpStatus.NOT_FOUND) )));
 	}
 
+	@GetMapping("/email/{email}")
+	public Flux<User> getUserByEmailIgnoreCase(@PathVariable("email") String email){
+		return userService.findByEmailContainingIgnoreCase(email);
+	}
+	
 	@PostMapping
 	public Mono<ResponseEntity<User>> newUser(@RequestBody User user, ServerHttpRequest req){
 		user.setLastLogin(Instant.now());
-		Mono<User> monoUser = Mono.just(user);
-		userService.save(monoUser);
 		//return monoUser.map( u -> ResponseEntity.created(URI.create(req.getPath() + "/" + u.getId())).build());
 		//return monoUser.map( u -> new ResponseEntity<User>(u, new HttpHeaders(),HttpStatus.OK));
-		return monoUser.map( u -> ResponseEntity.created( URI.create(req.getPath() + "/" + u.getId()) ).body(u)
+		return userService.save(user)
+				.map( u -> ResponseEntity.created( URI.create(req.getPath() + "/" + u.getId()) ).body(u)
 				           );
 	}
 	

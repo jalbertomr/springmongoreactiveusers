@@ -4,13 +4,18 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.Builder;
 
+@Document
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class User {
+	@Id
 	private long id;
 	private String name = "";
 	private String email = "";

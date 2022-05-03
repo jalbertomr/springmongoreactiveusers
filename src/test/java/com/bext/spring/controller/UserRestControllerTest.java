@@ -9,6 +9,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.context.ApplicationContext;
@@ -16,14 +18,19 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.reactive.server.WebTestClient.ResponseSpec;
 import org.springframework.web.reactive.function.BodyInserters;
 
+import com.bext.spring.repo.IUserRepository;
 import com.bext.spring.service.IUserService;
+import com.bext.spring.service.impl.UserServiceImpl;
 import com.bext.spring.user.domain.User;
 
 @WebFluxTest({UserRestController.class, IUserService.class})
+@TestMethodOrder(OrderAnnotation.class)
+@Disabled("Mocked in UserRestControllerMockedTest")
 public class UserRestControllerTest {
 
 	@Autowired
 	private ApplicationContext context;
+	@Autowired
 	private WebTestClient webTestClient;
 	
 	@BeforeEach
