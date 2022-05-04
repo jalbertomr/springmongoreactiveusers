@@ -15,4 +15,5 @@ public interface IUserService {
 	public Mono<User> save(User user);
 	public Mono<User> deleteById(Long Id);
 	public Flux<User> findByEmailContainingIgnoreCase(String email);
+	public Mono<User> findUserbyExample(User user);
 }

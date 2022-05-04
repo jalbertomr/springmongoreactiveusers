@@ -61,6 +61,11 @@ public class UserRestController {
 				           );
 	}
 	
+	@PostMapping("/search")
+	public Mono<User> getUserByExample(@RequestBody User user){
+		return userService.findUserbyExample(user);
+	}
+	
 /*	
 	@PostMapping     //Assign an fixed Id to test
 	public Mono<ResponseEntity<Object>> newUserFixId(@RequestBody Mono<User> userMono, ServerHttpRequest req){

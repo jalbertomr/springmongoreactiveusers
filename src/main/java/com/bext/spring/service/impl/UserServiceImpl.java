@@ -6,6 +6,9 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.ExampleMatcher.GenericPropertyMatcher;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -44,6 +47,20 @@ public class UserServiceImpl implements IUserService {
 	public Mono<User> findById(Long Id) {
 		return userRepository.findById(Id);
 	};
+	
+	public Mono<User> findUserbyExample(User user) {
+		ExampleMatcher matcher = ExampleMatcher.matching().withIgnoreCase()
+		.withMatcher("email", GenericPropertyMatcher::contains)
+		.withMatcher("role",  GenericPropertyMatcher::contains)
+		.withMatcher("enabled", GenericPropertyMatcher::exact);
+		Example<User> example = Example.of(user, matcher);
+		return userRepository.findOne(example);
+	}
+	
+	public Mono<User> findUserbyExampleExact(User user){
+		Example<User> exampleUser = Example.of(user);
+		return userRepository.findOne(exampleUser);
+	}
 	
 	public Mono<Boolean> existById(Long Id) {
 		return userRepository.existsById(Id);
