@@ -32,10 +32,10 @@ public class UserDataInitializer implements SmartInitializingSingleton{
 		log.info("profile: production initializing dataDB");
 		userRepository.deleteAll().subscribe();
 		
-		User user = new User(1,"Daisy Ridley Production", "daisy.ridley@email.com", "daisypassword", Collections.singletonList("ADMIN"), Instant.now(), true);
-		Mono<User> userSaved = userRepository.save(user);
+		User user = new User(1,"Daisy Ridley Production", null/*"daisy.ridley@email.com"*/, "daisypassword", Collections.singletonList("ADMIN"), Instant.now(), true);
+		Mono<User> userSaved = userRepository.save( user);
 		log.info("Save user {}", userSaved);
-		User user2= new User(2,"Tom Raider Production","tom.raider@email.com","tompassword", Collections.singletonList("ADMIN"), Instant.now(), false);
+		User user2= new User(2,"Tom Raider Production","tom.raider@email.com","tom", Collections.singletonList("ADMIN"), Instant.now(), false);
 		Mono<User> userSaved2 = userRepository.save(user);
 		log.info("Save user {}", userSaved2);
 		User user3= new User(3,"Peter Parker Production","peter.parker@email.com", "peterpassword", Stream.of("USER","ADMIN").collect(Collectors.toList()), Instant.now(), true);

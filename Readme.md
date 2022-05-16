@@ -97,7 +97,56 @@ With data
         "statusCodeValue": 200
     }
     ]
+
+###### findAll with limit
+
+    public Flux<User> findAllLimit(@RequestParam(name = "limit", required = false, defaultValue="-1")       long limit ) {
+		if (limit == -1) {
+			return userRepository.findAll();
+		};
+		return userRepository.findAll().take(limit);
+	 };
+
+###### findUserByExample
+
+Using matchers the search can require some part, exact part,... of the fields 
+
+	public Mono<User> findUserbyExample(User user) {
+		ExampleMatcher matcher = ExampleMatcher.matching().withIgnoreCase()
+		.withMatcher("email", GenericPropertyMatcher::contains)
+		.withMatcher("role",  GenericPropertyMatcher::contains)
+		.withMatcher("enabled", GenericPropertyMatcher::exact);
+		Example<User> example = Example.of(user, matcher);
+		return userRepository.findOne(example);
+	}
     
+#### DataBase Initializing
 
+The initializing of the database is using a bean, a class that implements the SmartInitilizingSingleton overriding the afterSingletonInstantiated method.
 
+#### Validation with JSR-303, (javax.validation)
 
+ To validate the input data at controller level, add the dependency
+ 
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+ 
+Put the respective annotations on the field of the entity class
+
+    ...
+    __@NotEmpty @NotNull(message="email must be supplied")__
+	 @Builder.Default
+	 private String email = "";
+	
+    __@Size(min=8,max=254)__
+    private String password = "";
+	 ...
+
+In the controller must be the @Valid annotation in the parameter area of the function
+
+    @PostMapping
+	 public Mono<ResponseEntity<User>> newUserMono(__@Valid__ @RequestBody Mono<User> userMono,    ServerHttpRequest req) {
+	 ...
+		 

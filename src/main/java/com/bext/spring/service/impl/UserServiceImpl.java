@@ -1,6 +1,7 @@
 package com.bext.spring.service.impl;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -37,13 +38,13 @@ public class UserServiceImpl implements IUserService {
 	private void createUserModel() {
 		log.info("UserService profile !production initilizing dataDB");
 		userRepository.deleteAll();
-		User user = new User("Daisy Ridley", "daisy.ridley@email.com", "daisypassword", Collections.singletonList("ADMIN"), Instant.now(), true);
+		User user = new User(1, "Daisy Ridley", "daisy.ridley@email.com", "daisypassword", Collections.singletonList("ADMIN"), Instant.now(), true);
         Mono<User> usersaved = save(user);
         log.info("usersaved: {}", usersaved);
-		User user2= new User("Tom Raider","tom.raider@email.com","tompassword", Collections.singletonList("ADMIN"), Instant.now(), false);
-		User user3= new User("Peter Parker","peter.parker@email.com", "peterpassword", Stream.of("USER","ADMIN").collect(Collectors.toList()), Instant.now(), true);
+		User user2= new User(2 ,"Tom Raider","tom.raider@email.com","tompassword", Collections.singletonList("ADMIN"), Instant.now(), false);
+		User user3= new User(3 ,"Peter Parker","peter.parker@email.com", "peterpassword", Stream.of("USER","ADMIN").collect(Collectors.toList()), Instant.now(), true);
 		
-		//userRepository.saveAll(Arrays.asList(user, user2, user3)).subscribe();
+		userRepository.saveAll(Arrays.asList(user, user2, user3)).subscribe();
 	}
 
 	public Flux<User> findAllLimit(@RequestParam(name = "limit", required = false, defaultValue="-1") long limit ) {

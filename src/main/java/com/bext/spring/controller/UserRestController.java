@@ -3,6 +3,8 @@ package com.bext.spring.controller;
 import java.net.URI;
 import java.time.Instant;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -59,14 +61,14 @@ public class UserRestController {
 	}
 
 	@PostMapping
-	public Mono<ResponseEntity<User>> newUserMono(@RequestBody Mono<User> userMono, ServerHttpRequest req) {
+	public Mono<ResponseEntity<User>> newUserMono(@Valid @RequestBody Mono<User> userMono, ServerHttpRequest req) {
 		return userMono.flatMap(userService::save)
 					.map(u -> ResponseEntity.created(URI.create(req.getPath() + "/" + u.getId())).body(u));
 	}
 
 	@PostMapping("/search")
-	public Mono<ResponseEntity<User>> getUserByExample(@RequestBody User user) {
-		return userService.findUserbyExample(user)
+	public Mono<ResponseEntity<User>> getUserByExample(@RequestBody Mono<User> userMono) {
+		return userMono.flatMap(user -> userService.findUserbyExample(user))
 				.map(u -> ResponseEntity.ok(u))
 				.defaultIfEmpty(ResponseEntity.notFound().build());
 	}
