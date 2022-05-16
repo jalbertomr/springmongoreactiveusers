@@ -2,9 +2,6 @@ package com.bext.spring.controller;
 
 import java.net.URI;
 import java.time.Instant;
-import java.util.Collections;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,8 +17,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.bext.spring.repo.IUserRepository;
 import com.bext.spring.service.IUserService;
-import com.bext.spring.service.impl.UserServiceImpl;
 import com.bext.spring.user.domain.User;
 
 import reactor.core.publisher.Flux;
@@ -30,60 +27,60 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("/user")
 public class UserRestController {
- 
+
+	@Autowired
+	private IUserRepository userRepository;
+	
 	@Autowired
 	private IUserService userService;
+
+//	@GetMapping
+//	public Flux<User> getUsers(){
+//		return userRepository.findAll();
+//	}
 	
 	@GetMapping
-	public Flux<User> getUsers(@RequestParam(name = "limit", required = false, defaultValue = "-1") long limit){
+	public Flux<?> getUsersLimit(@RequestParam(name = "limit", required = false, defaultValue = "-1") long limit) {
 		return userService.findAllLimit(limit);
 	}
-	
+
 	@GetMapping("/{id}")
-	public Mono<ResponseEntity<User>> getUserById(@PathVariable("id") long Id){
+	public Mono<ResponseEntity<User>> getUserById(@PathVariable("id") long Id) {
 		Mono<User> monoUser = userService.findById(Id);
-		return monoUser.map( ResponseEntity::ok)
-				.switchIfEmpty( Mono.error(( new ResponseStatusException(HttpStatus.NOT_FOUND) )));
+		return monoUser.map(ResponseEntity::ok)
+			//	.switchIfEmpty(Mono.error((new ResponseStatusException(HttpStatus.NOT_FOUND)))); //generates a stack trace
+				.defaultIfEmpty(ResponseEntity.notFound().build());
 	}
 
 	@GetMapping("/email/{email}")
-	public Flux<User> getUserByEmailIgnoreCase(@PathVariable("email") String email){
+	public Flux<?> getUserByEmailIgnoreCase(@PathVariable("email") String email) {
 		return userService.findByEmailContainingIgnoreCase(email);
+				//.switchIfEmpty(Flux.error(new ResponseStatusException(HttpStatus.NOT_FOUND)));
 	}
-	
+
 	@PostMapping
-	public Mono<ResponseEntity<User>> newUser(@RequestBody User user, ServerHttpRequest req){
-		user.setLastLogin(Instant.now());
-		//return monoUser.map( u -> ResponseEntity.created(URI.create(req.getPath() + "/" + u.getId())).build());
-		//return monoUser.map( u -> new ResponseEntity<User>(u, new HttpHeaders(),HttpStatus.OK));
-		return userService.save(user)
-				.map( u -> ResponseEntity.created( URI.create(req.getPath() + "/" + u.getId()) ).body(u)
-				           );
+	public Mono<ResponseEntity<User>> newUserMono(@RequestBody Mono<User> userMono, ServerHttpRequest req) {
+		return userMono.flatMap(userService::save)
+					.map(u -> ResponseEntity.created(URI.create(req.getPath() + "/" + u.getId())).body(u));
 	}
-	
+
 	@PostMapping("/search")
-	public Mono<User> getUserByExample(@RequestBody User user){
-		return userService.findUserbyExample(user);
+	public Mono<ResponseEntity<User>> getUserByExample(@RequestBody User user) {
+		return userService.findUserbyExample(user)
+				.map(u -> ResponseEntity.ok(u))
+				.defaultIfEmpty(ResponseEntity.notFound().build());
 	}
-	
-/*	
-	@PostMapping     //Assign an fixed Id to test
-	public Mono<ResponseEntity<Object>> newUserFixId(@RequestBody Mono<User> userMono, ServerHttpRequest req){
-		userMono = userMono.map( user -> {
-			user.setId(6);
-			return user;
-		});
-		users = users.mergeWith(userMono);
-		return userMono.map( u -> 
-			ResponseEntity.created(URI.create(req.getPath() + "/" + u.getId()) ).body(u));
-	}
-*/
+
+//	@DeleteMapping("/{id}")
+//	public Mono<ResponseEntity<Void>> deleteUser(@PathVariable("id") long id) {
+//		return userService.deleteWithHttpResponse(id);
+//	}
 	
 	@DeleteMapping("/{id}")
-	public Mono<ResponseEntity<User>> deleteUser(@PathVariable("id") long id){
-		Mono<User> userfound = userService.deleteById(id);
-		return userfound.map(ResponseEntity::ok)
-				.switchIfEmpty( Mono.error((new ResponseStatusException(HttpStatus.NOT_FOUND))));
+	public Mono<ResponseEntity<User>> deleteUser(@PathVariable long id) {
+		return userService.deleteById(id)
+				.map(userDeleted -> ResponseEntity.ok(userDeleted))
+				.defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+		        //.switchIfEmpty(Mono.error( new ResponseStatusException(HttpStatus.NOT_FOUND))); //same but with stacktrace
 	}
-	
 }

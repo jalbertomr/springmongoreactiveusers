@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.Builder;
 
-@Document
+@Document(collection = "user")
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class User {
@@ -24,10 +24,23 @@ public class User {
 	private Instant lastLogin = Instant.now();
 	private boolean enabled;
 	
+	public User() {
+	}
+	
 	public User(long id, String name, String email, String password, List<String> roles, Instant lastLogin,
 			boolean enabled) {
 		super();
 		this.id = id;
+		this.name = name;
+		this.email = email;
+		this.password = password;
+		this.roles = roles;
+		this.lastLogin = lastLogin;
+		this.enabled = enabled;
+	}
+	
+	public User(String name, String email, String password, List<String> roles, Instant lastLogin,
+			boolean enabled) {
 		this.name = name;
 		this.email = email;
 		this.password = password;
@@ -79,5 +92,4 @@ public class User {
 		this.enabled = enabled;
 	}
 
-	
 }

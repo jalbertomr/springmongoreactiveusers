@@ -107,7 +107,7 @@ public class UserRestControllerMockedTest {
 	@Order(6)
 	public void createUserMethodNotAllowed() {
 		var user = new User(6, "Beto", "beto@test.com", "secret", List.of("USER"), null, true);
-		webTestClient.post().uri("/user/search").body(BodyInserters.fromValue(user)).exchange().expectStatus()
+		webTestClient.post().uri("/user/notallow").body(BodyInserters.fromValue(user)).exchange().expectStatus()
 				.is4xxClientError();
 	}
 

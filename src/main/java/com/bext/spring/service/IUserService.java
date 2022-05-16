@@ -1,5 +1,6 @@
 package com.bext.spring.service;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.bext.spring.user.domain.User;
@@ -14,6 +15,7 @@ public interface IUserService {
 	public Mono<Boolean> existById(Long Id);
 	public Mono<User> save(User user);
 	public Mono<User> deleteById(Long Id);
+	public Mono<ResponseEntity<Void>> deleteWithHttpResponse(Long id);
 	public Flux<User> findByEmailContainingIgnoreCase(String email);
 	public Mono<User> findUserbyExample(User user);
 }
