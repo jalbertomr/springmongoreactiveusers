@@ -1,15 +1,24 @@
 package com.bext.spring.user.domain;
 
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
+import javax.validation.Constraint;
+import javax.validation.ConstraintValidator;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.springframework.data.annotation.Id;
 
+import com.bext.spring.customValidator.ValidRoles;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.AllArgsConstructor;
@@ -39,6 +48,7 @@ public class User {
 	private String password = "";
 	
 	@Builder.Default
+	@ValidRoles
 	private List<String> roles = new ArrayList<>();
 	
 	@Builder.Default
@@ -49,70 +59,6 @@ public class User {
 	public User(long id) {
 	  this.id = id;
 	}
-	
-//	public User(long id, String name, String email, String password, List<String> roles, Instant lastLogin,
-//			boolean enabled) {
-//		super();
-//		this.id = id;
-//		this.name = name;
-//		this.email = email;
-//		this.password = password;
-//		this.roles = roles;
-//		this.lastLogin = lastLogin;
-//		this.enabled = enabled;
-//	}
-//	
-//	public User(String name, String email, String password, List<String> roles, Instant lastLogin,
-//			boolean enabled) {
-//		this.name = name;
-//		this.email = email;
-//		this.password = password;
-//		this.roles = roles;
-//		this.lastLogin = lastLogin;
-//		this.enabled = enabled;
-//	}
-//	
-//	public long getId() {
-//		return id;
-//	}
-//	public void setId(long id) {
-//		this.id = id;
-//	}
-//	public String getName() {
-//		return name;
-//	}
-//	public void setName(String name) {
-//		this.name = name;
-//	}
-//	public String getEmail() {
-//		return email;
-//	}
-//	public void setEmail(String email) {
-//		this.email = email;
-//	}
-//	public String getPassword() {
-//		return password;
-//	}
-//	public void setPassword(String password) {
-//		this.password = password;
-//	}
-//	public List<String> getRoles() {
-//		return roles;
-//	}
-//	public void setRoles(List<String> roles) {
-//		this.roles = roles;
-//	}
-//	public Instant getLastLogin() {
-//		return lastLogin;
-//	}
-//	public void setLastLogin(Instant lastLogin) {
-//		this.lastLogin = lastLogin;
-//	}
-//	public boolean isEnabled() {
-//		return enabled;
-//	}
-//	public void setEnabled(boolean enabled) {
-//		this.enabled = enabled;
-//	}
-
 }
+
+

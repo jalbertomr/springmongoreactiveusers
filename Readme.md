@@ -149,4 +149,40 @@ In the controller must be the @Valid annotation in the parameter area of the fun
     @PostMapping
 	 public Mono<ResponseEntity<User>> newUserMono(__@Valid__ @RequestBody Mono<User> userMono,    ServerHttpRequest req) {
 	 ...
+
+
+#### Custom Validator
+
+Define the annotation for the roles validator
+
+	@Target({ ElementType.FIELD})
+	@Retention(RetentionPolicy.RUNTIME)
+	@Constraint(validatedBy = {ValidRolesValidator.class})
+	@Documented
+	public @interface ValidRoles {
+		String message() default "invalid role detected";
+		Class<?>[] groups() default {};
+		Class<? extends Payload>[] payload() default {};
+	}
+
+Define the behavior of the validator
+
+    public class ValidRolesValidator implements ConstraintValidator<ValidRoles, Collection<String>> {
+	
+	 private List<String> validRoles = Arrays.asList("ROLE_USER","ROLE_ADMIN");
+	
+	   @Override
+	   public boolean isValid(Collection<String> collection, ConstraintValidatorContext context) {
+        return collection.stream().allMatch(validRoles::contains);
+	   }
+    }
+
+finally put the role validator in the field of the entity
+
+	public class User {
+	    ...
+	    @ValidRoles
+		private List<String> roles = new ArrayList<>();
+		...
+	}
 		 
